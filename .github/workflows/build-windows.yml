@@ -1,0 +1,78 @@
+name: Build Windows Installer (PC)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compilar con Gradle wrapper
+        run: ./gradlew build --no-daemon
+
+      - name: Descargar jmods JavaFX 21.0.5 (win)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/21.0.5/openjfx-21.0.5_windows-x64_bin-jmods.zip" -OutFile jfx.zip
+          Expand-Archive jfx.zip . ; Get-ChildItem javafx-jmods-21.0.5 | Select-Object -First 7
+
+      - name: Crear runtime image con jlink (incluye nativos JavaFX)
+        shell: pwsh
+        run: |
+          $jmodDir = (Resolve-Path 'javafx-jmods-21.0.5').Path
+          jlink --module-path "$jmodDir;$env:JAVA_HOME\jmods" `
+                --add-modules javafx.controls,javafx.fxml,java.sql `
+                --strip-debug --no-header-files --no-man-pages `
+                --output runtime
+
+      - name: Preparar carpeta de entrada (app jar + deps)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force input
+          Get-ChildItem build\libs\*.jar | Copy-Item -Destination input\
+
+      - name: Empaquetar MSI (instalador Windows)
+        shell: pwsh
+        run: |
+          $mainJar = (Get-ChildItem build\libs\*.jar | Where-Object { $_.Name -notmatch 'sqlite|gson' } | Select-Object -First 1).Name
+          jpackage --type msi --name "GCI" --app-version 1.0.0 `
+                  --runtime-image runtime --input input `
+                  --main-jar $mainJar --main-class cu.lazaroysr96.gci.MainApp `
+                  --java-options "--enable-native-access=ALL-UNNAMED" `
+                  --win-menu --win-dir-chooser
+          Get-ChildItem *.msi
+
+      - name: Empaquetar app-image portable (ZIP)
+        shell: pwsh
+        run: |
+          $mainJar = (Get-ChildItem build\libs\*.jar | Where-Object { $_.Name -notmatch 'sqlite|gson' } | Select-Object -First 1).Name
+          jpackage --type app-image --name "GCI-portable" `
+                  --runtime-image runtime --input input `
+                  --main-jar $mainJar --main-class cu.lazaroysr96.gci.MainApp `
+                  --java-options "--enable-native-access=ALL-UNNAMED"
+          Compress-Archive -Path GCI-portable -DestinationPath GCI-portable.zip
+
+      - name: Subir MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: GCI-Windows-Installer
+          path: '*.msi'
+
+      - name: Subir ZIP portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: GCI-Windows-Portable
+          path: GCI-portable.zip
