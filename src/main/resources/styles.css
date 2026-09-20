@@ -1,0 +1,75 @@
+/* Gestor Contable para Iglesias - PC */
+
+.root {
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-background-color: #EEF0F5;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #EEF0F5;
+}
+
+.scroll-pane {
+    -fx-background-color: #EEF0F5;
+}
+
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+    -fx-border-color: transparent;
+    -fx-padding: 4px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F2F6FB;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 36px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #7A8BA6;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #EDF1F6 transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FAFCFF;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #D5E9FF;
+    -fx-text-fill: #223344;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #E4EAF2;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 6px 18px;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #FFFFFF;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #7A8BA6;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #0080ff;
+}
