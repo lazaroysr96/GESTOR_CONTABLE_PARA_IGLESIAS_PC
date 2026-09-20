@@ -23,7 +23,7 @@ jobs:
       - name: Compilar (genera jar en build/libs)
         shell: pwsh
         run: |
-          ./gradlew jar --no-daemon
+          .\gradlew.bat jar --no-daemon
           Write-Host "=== Contenido build\libs ==="
           Get-ChildItem build\libs | Select-Object Name,Length
 
